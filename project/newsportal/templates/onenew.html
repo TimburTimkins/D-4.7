@@ -1,0 +1,14 @@
+<html>
+
+{% load custom_filters %}
+
+<body>
+<center>
+    <h1>{{ new.name }}</h1>
+    <h1>{{ new.category }}</h1>
+    <h1>{{ new.text|censor }}</h1>
+    <h1>{{ new.date_on|date:'d M Y' }}</h1>
+</center>
+</body>
+
+</html>

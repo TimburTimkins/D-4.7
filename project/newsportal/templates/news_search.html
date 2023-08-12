@@ -1,0 +1,42 @@
+<html>
+
+{% load custom_tags %}
+
+<body>
+<center>
+    <form action="" method="get">
+       {{ filterset.form.as_p }}
+       <input type="submit" value="Найти" />
+    </form>
+   <table>
+   {% for i in text %}
+   <tr>
+       <td>{{ i.name }}</td>
+       <td>{{ i.category }}</td>
+       <td>{{ i.date_on|date:'d M Y' }}</td>
+       <td>{{ i.text|truncatechars:20 }}</td>
+   </tr>
+   {% endfor %}
+   </table>
+
+      {% if page_obj.has_previous %}
+          <a href="?{% url_replace page=1 %}">1</a>
+          {% if page_obj.previous_page_number != 1 %}
+              ...
+              <a href="?{% url_replace page=page_obj.previous_page_number  %}">{{ page_obj.previous_page_number }}</a>
+          {% endif %}
+      {% endif %}
+
+      {{ page_obj.number }}
+
+      {% if page_obj.has_next %}
+          <a href="?{% url_replace page=page_obj.next_page_number %}">{{ page_obj.next_page_number }}</a>
+          {% if paginator.num_pages != page_obj.next_page_number %}
+              ...
+              <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
+          {% endif %}
+      {% endif %}
+</center>
+</body>
+
+</html>

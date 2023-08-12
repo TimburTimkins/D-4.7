@@ -1,0 +1,14 @@
+<html>
+
+<body>
+<center>
+<hr>
+    <form action="" method="post">
+        {% csrf_token %}
+        <p>Удаляем "{{ object.name }}"?</p>
+        <input type="submit" value="Delete" />
+    </form>
+</center>
+</body>
+
+</html>
