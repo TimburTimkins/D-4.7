@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import News
 from .filters import NewsFilter
@@ -60,7 +61,8 @@ def create_news(request):
     return render(request, 'news_edit.html', {'form': form})
 
 
-class NewsCreate(CreateView):
+class NewsCreate(LoginRequiredMixin, CreateView):
+    raise_exception = True
     form_class = NewsForm
     model = News
     template_name = 'news_edit.html'
@@ -71,7 +73,8 @@ class NewsCreate(CreateView):
         return super().form_valid(form)
 
 
-class ArtCreate(CreateView):
+class ArtCreate(LoginRequiredMixin, CreateView):
+    raise_exception = True
     form_class = NewsForm
     model = News
     template_name = 'news_edit.html'
