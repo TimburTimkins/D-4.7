@@ -6,6 +6,43 @@ from .forms import NewsForm
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.db.models import Exists, OuterRef
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_protect
+from .models import Subscriber, Category
+
+
+@login_required
+@csrf_protect
+def subscriptions(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Category.objects.get(id=category_id)
+        action = request.POST.get('action')
+
+        if action == 'subscribe':
+            Subscriber.objects.create(user=request.user, category=category)
+        elif action == 'unsubscribe':
+            Subscriber.objects.filter(
+                user=request.user,
+                category=category,
+            ).delete()
+
+    categories_with_subscriptions = Category.objects.annotate(
+        user_subscribed=Exists(
+            Subscriber.objects.filter(
+                user=request.user,
+                category=OuterRef('pk'),
+            )
+        )
+    ).order_by('name')
+    return render(
+        request,
+        'subscriptions.html',
+        {'categories': categories_with_subscriptions},
+    )
 
 
 class NewsList(ListView):
@@ -61,49 +98,59 @@ def create_news(request):
     return render(request, 'news_edit.html', {'form': form})
 
 
-class NewsCreate(LoginRequiredMixin, CreateView):
+class NewsCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     raise_exception = True
+    permission_required = ('newsportal.add_news',)
     form_class = NewsForm
     model = News
     template_name = 'news_edit.html'
 
     def form_valid(self, form):
         news = form.save(commit=False)
-        news.category = 'News'
+        news.type = 'NEW'
         return super().form_valid(form)
 
 
-class ArtCreate(LoginRequiredMixin, CreateView):
+class ArtCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     raise_exception = True
+    permission_required = ('newsportal.add_news',)
     form_class = NewsForm
     model = News
     template_name = 'news_edit.html'
 
     def form_valid(self, form):
         news = form.save(commit=False)
-        news.category = 'Article'
+        news.type = 'AR'
         return super().form_valid(form)
 
 
-class NewsUpdate(UpdateView):
+class NewsUpdate(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
+    raise_exception = True
+    permission_required = ('newsportal.change_news',)
     form_class = NewsForm
     model = News
     template_name = 'news_edit.html'
 
 
-class ArtUpdate(UpdateView):
+class ArtUpdate(PermissionRequiredMixin, LoginRequiredMixin, UpdateView):
+    raise_exception = True
+    permission_required = ('newsportal.change_news',)
     form_class = NewsForm
     model = News
     template_name = 'news_edit.html'
 
 
-class NewsDelete(DeleteView):
+class NewsDelete(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
+    raise_exception = True
+    permission_required = ('newsportal.delete_news',)
     model = News
     template_name = 'news_delete.html'
     success_url = reverse_lazy('news_list')
 
 
-class ArtDelete(DeleteView):
+class ArtDelete(PermissionRequiredMixin, LoginRequiredMixin, DeleteView):
+    raise_exception = True
+    permission_required = ('newsportal.delete_news',)
     model = News
     template_name = 'news_delete.html'
     success_url = reverse_lazy('news_list')

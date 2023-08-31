@@ -41,6 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
     'fpages',
+    'newsportal',
+    'django_filters',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.yandex',
+    'django_apscheduler',
 ]
 
 SITE_ID = 1
@@ -62,7 +69,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'newsportal/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -135,3 +142,39 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS = [
     BASE_DIR / "static"
 ]
+
+LOGIN_REDIRECT_URL = "/news"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+
+ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = "timburtim"
+EMAIL_HOST_PASSWORD = "htffutbegmlekgzl"
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = "timburtim@yandex.ru"
+
+SERVER_EMAIL = "timburtim@yandex.ru"
+
+MANAGERS = (
+    ('Rick', 'timburtim@yandex.ru'),
+)
+
+ADMINS = (
+    ('Steve', 'timburtim@yandex.ru'),
+)
+

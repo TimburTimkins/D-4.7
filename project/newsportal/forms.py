@@ -8,6 +8,8 @@ class NewsForm(forms.ModelForm):
        model = News
        fields = [
            'name',
+           'type',
+           'category',
            'text',
        ]
 

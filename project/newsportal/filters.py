@@ -18,5 +18,6 @@ class NewsFilter(FilterSet):
         model = News
         fields = {
             'name': ['icontains'],
-            'category': ['exact']
+            'type': ['exact'],
+            # 'category': ['icontains'],
         }

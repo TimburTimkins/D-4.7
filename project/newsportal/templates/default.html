@@ -4,15 +4,39 @@
 
 <body>
 <center>
+    {% if perms.newsportal.add_news %}
+    <a href="{% url 'news_create' %}">Добавить пост</a>
+    {% endif %}
+
    <table>
-   {% for i in text %}
-   <tr>
-       <td>{{ i.name }}</td>
-       <td>{{ i.category }}</td>
-       <td>{{ i.date_on|date:'d M Y' }}</td>
-       <td>{{ i.text|truncatechars:20 }}</td>
-   </tr>
-   {% endfor %}
+       <tr>
+           <td>Название</td>
+           <td>Тип</td>
+           <td>Категория</td>
+           <td>Дата</td>
+           <td>Текст</td>
+           {% if perms.simpleapp.change_product or perms.simpleapp.delete_new %}
+           <td>Действия</td>
+           {% endif %}
+       </tr>
+
+       {% for i in text %}
+       <tr>
+           <td>{{ i.name }}</td>
+           <td>{{ i.type }}</td>
+           <td>{{ i.category }}</td>
+           <td>{{ i.date_on|date:'d M Y' }}</td>
+           <td>{{ i.text|truncatechars:20 }}</td>
+           <td>
+               {% if perms.newsportal.change_news %}
+               <a href="{% url 'news_update' pk=i.id %}">Изменить</a>
+               {% endif %}
+               {% if perms.newsportal.delete_news %}
+               <a href="{% url 'news_delete' i.id %}">Удалить</a>
+               {% endif %}
+           </td>
+       </tr>
+       {% endfor %}
    </table>
 
       {% if page_obj.has_previous %}
