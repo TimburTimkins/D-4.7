@@ -25,11 +25,19 @@ def my_job():
         news_subscriber = news.filter(category=subscriber.category)
         text = '\n'.join([f'{n.name} - {n.text}' for n in news_subscriber])
 
+        html_content = (
+            f'Название: {News.name}<br>'
+            f'Тип: {News.type}<br><br>'
+            
+            f'Ссылка на пост</a>'
+        )
+
         msg = EmailMultiAlternatives(
             subject='Посты за неделю',
             body=text,
             to=[subscriber.user.email],
         )
+        msg.attach_alternative(html_content, "text/html")
         msg.send()
 
 
@@ -47,7 +55,7 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             my_job,
-            trigger=CronTrigger(minute="04", hour="23"),
+            trigger=CronTrigger(minute="29", hour="23", day_of_week="thu"),
             id="my_job",  # The `id` assigned to each job MUST be unique
             max_instances=1,
             replace_existing=True,
@@ -57,7 +65,7 @@ class Command(BaseCommand):
         scheduler.add_job(
             delete_old_job_executions,
             trigger=CronTrigger(
-                day_of_week="tue", hour="00", minute="00"
+                day_of_week="mon", hour="00", minute="00"
             ),
             id="delete_old_job_executions",
             max_instances=1,
