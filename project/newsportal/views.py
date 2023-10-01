@@ -12,6 +12,14 @@ from django.db.models import Exists, OuterRef
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
 from .models import Subscriber, Category
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+from .tasks import new_post
+
+
+@cache_page(60 * 15)
+def my_view(request):
+    ...
 
 
 @login_required
@@ -74,6 +82,15 @@ class NewsDetail(DetailView):
     template_name = 'onenew.html'
     context_object_name = 'new'
 
+    def get_object(self, *args, **kwargs):
+        obj = cache.get(f'new-{self.kwargs["pk"]}',
+                        None)
+
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'new-{self.kwargs["pk"]}', obj)
+            return obj
+
 
 def multiply(request):
    number = request.GET.get('number')
@@ -105,10 +122,10 @@ class NewsCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
     model = News
     template_name = 'news_edit.html'
 
-    def form_valid(self, form):
-        news = form.save(commit=False)
-        news.type = 'NEW'
-        return super().form_valid(form)
+    # def form_valid(self, form):
+    #     news = form.save(commit=False)
+    #     news.type = 'NEW'
+    #     return super().form_valid(form)
 
 
 class ArtCreate(PermissionRequiredMixin, LoginRequiredMixin, CreateView):
