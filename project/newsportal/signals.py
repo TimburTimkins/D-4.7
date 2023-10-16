@@ -10,7 +10,7 @@ from newsportal.tasks import new_post
 @receiver(post_save, sender=News)
 def news_created(sender,instance, created, **kwargs):
     if created:
-        new_post.delay(instance.id, instance.name, instance.text)
+        new_post.delay(instance.id)
 
 
 

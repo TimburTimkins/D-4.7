@@ -39,23 +39,22 @@ def new_post_notify(instance_id):
         msg.send()
 
 @shared_task
-def new_post(instance, created, text, **kwargs):
-    if not created:
-        return
+def new_post(news_id):
+    news = News.objects.get(pk=news_id)
     emails = User.objects.filter(
-        subscriptions__category=instance.category
+        subscriptions__category=news.category
     ).values_list('email', flat=True)
 
-    subject = f'Новый пост в категории {instance.category}'
+    subject = f'Новый пост в категории {news.category}'
     text_content = (
-        f'Название: {instance.name}\n'
-        f'Текст: {instance.text}\n\n'
-        f'Ссылка на пост: http://127.0.0.1:8000{instance.get_absolute_url()}'
+        f'Название: {news.name}\n'
+        f'Текст: {news.text}\n\n'
+        f'Ссылка на пост: http://127.0.0.1:8000{news.get_absolute_url()}'
     )
     html_content = (
-        f'Название: {instance.name}<br>'
-        f'Текст: {instance.text}<br><br>'
-        f'<a href="http://127.0.0.1{instance.get_absolute_url()}">'
+        f'Название: {news.name}<br>'
+        f'Текст: {news.text}<br><br>'
+        f'<a href="http://127.0.0.1{news.get_absolute_url()}">'
         f'Ссылка на пост</a>'
     )
     for email in emails:

@@ -12,6 +12,7 @@ app.autodiscover_tasks()
 app.conf.beat_schedule = {
     'action_every_monday_8am': {
         'task': 'newsportal.tasks.new_post_notify',
-        'schedule': crontab(hour=8, minute=0, day_of_week='monday'),
+        'schedule': crontab(),
+        'args': (5,),
     },
 }
