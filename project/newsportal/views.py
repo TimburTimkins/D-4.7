@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from .models import News
 from .filters import NewsFilter
 from .forms import NewsForm
@@ -15,6 +15,18 @@ from .models import Subscriber, Category
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
 from .tasks import new_post
+from django.utils.translation import gettext as _
+
+
+class Index(View):
+    def get(self, request):
+        string = _('Hello world')
+
+        context = {
+            'string': string
+        }
+
+        return HttpResponse(render(request, 'default.html', context))
 
 
 @cache_page(60 * 15)
