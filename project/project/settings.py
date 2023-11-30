@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
     'django_apscheduler',
+    'rest_framework',
 ]
 
 SITE_ID = 1
@@ -61,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+    'newsportal.middlewares.TimezoneMiddleware',
 
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     # 'django.middleware.cache.UpdateCacheMiddleware',
@@ -277,7 +281,7 @@ LOGGING = {
         },
         'security': {
             'level': 'DEBUG',
-            'filters': ['require_debug_true'],
+            'filters': ['require_debug_false'],
             'class': 'logging.FileHandler',
             'filename': 'security.log',
             'formatter': 'general',
@@ -292,6 +296,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['consoles', 'consoleh', 'consoled', 'general'],
+            # 'level': 'DEBUG',
             'propagate': True,
         },
         'django.request': {
@@ -317,4 +322,14 @@ LOGGING = {
     }
 }
 
+
+REST_FRAMEWORK = {
+   'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+   'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+   'PAGE_SIZE': 10,
+   'DEFAULT_PERMISSION_CLASSES': [
+       'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+   ]
+
+}
 

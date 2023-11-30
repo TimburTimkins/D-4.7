@@ -1,32 +1,59 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
-from .models import News
 from .filters import NewsFilter
 from .forms import NewsForm
 from django.http import HttpResponse
-from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
-from .models import Subscriber, Category
+from .models import News, Subscriber, Category
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+from django.utils import timezone
+import pytz
+from django.shortcuts import redirect
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import permissions
+from newsportal.serializers import *
 from .tasks import new_post
 from django.utils.translation import gettext as _
 
 
+class NewsViewset(viewsets.ModelViewSet):
+   queryset = News.objects.all()
+   serializer_class = NewsSerializer
+
+
+class CategoryViewset(viewsets.ModelViewSet):
+   queryset = Category.objects.all()
+   serializer_class = CategorySerializer
+
+
+class SubscriberViewest(viewsets.ModelViewSet):
+   queryset = Subscriber.objects.all()
+   serializer_class = SubscriberSerializer
+
+
 class Index(View):
     def get(self, request):
-        string = _('Hello world')
+
+        models = News.objects.all()
 
         context = {
-            'string': string
+            'models': models,
+            'current_time': timezone.localtime(timezone.now()),
+            'timezones': pytz.common_timezones,
         }
 
         return HttpResponse(render(request, 'default.html', context))
+
+    def post(self, request):
+        request.session['django_timezone'] = request.POST['timezone']
+        return redirect('/')
 
 
 @cache_page(60 * 15)
@@ -65,12 +92,31 @@ def subscriptions(request):
     )
 
 
-class NewsList(ListView):
+class NewsportalList(ListView):
     model = News
     ordering = '-date_on'
     template_name = 'default.html'
     context_object_name = 'text'
     paginate_by = 10
+
+
+class NewsList(ListView):
+    model = News
+    ordering = '-date_on'
+    template_name = 'default.html'
+    context_object_name = 'text'
+    queryset = News.objects.filter(type= 'NEW')
+    paginate_by = 10
+
+
+class ArtList(ListView):
+    model = News
+    ordering = '-date_on'
+    template_name = 'default.html'
+    context_object_name = 'text'
+    queryset = News.objects.filter(type= 'ARTICLE')
+    paginate_by = 10
+
 
 class NP_Search(ListView):
     form_class = NewsForm

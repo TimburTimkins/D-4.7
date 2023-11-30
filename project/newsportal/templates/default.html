@@ -1,5 +1,7 @@
 {% load i18n %}
 
+{% load tz %}
+
 <html lang="en">
 
 {% load custom_tags %}
@@ -9,6 +11,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page title</title>
+    <style>
+        body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} darkgrey {% else %} khaki {% endif %};}
+    </style>
 </head>
 <body>
     <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} <!-- Не забываем по csrf_token для POST запросов -->
@@ -26,25 +31,44 @@
         </select>
         <input type="submit" value="set">
     </form>
-    {{ string }} <!-- Это уже знакомая нам переменная, просто засунули её в шаблон -->
-    {% trans "Check out my new cool translation" %}!
+
+    {% get_current_timezone as TIME_ZONE %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <label for="timezone">Time zone:</label>
+        <select name="timezone">
+            {% for tz in timezones %}
+            <option value="{{ tz }}"{% if tz == TIME_ZONE %} selected{% endif %}>{{ tz }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Set">
+    </form>
+
+    {{ TIME_ZONE }}
+    {{ current_time|timezone:TIME_ZONE }}
+
+    {% for model in models %}
+    <div class="model-class">
+        {{ model.name }}
+    </div>
+    {% endfor %}
 </body>
 
 <body>
 <center>
     {% if perms.newsportal.add_news %}
-    <a href="{% url 'news_create' %}">Добавить пост</a>
+    <a href="{% url 'news_create' %}">{% trans "Add a post" %}</a>
     {% endif %}
 
    <table>
        <tr>
-           <td>Название</td>
-           <td>Тип</td>
-           <td>Категория</td>
-           <td>Дата</td>
-           <td>Текст</td>
+           <td>{% trans "Title" %}</td>
+           <td>{% trans "Type" %}</td>
+           <td>{% trans "Category" %}</td>
+           <td>{% trans "Date" %}</td>
+           <td>{% trans "Text" %}</td>
            {% if perms.simpleapp.change_product or perms.simpleapp.delete_new %}
-           <td>Действия</td>
+           <td>{% trans "Activity" %}</td>
            {% endif %}
        </tr>
 
@@ -57,10 +81,10 @@
            <td>{{ i.text|truncatechars:20 }}</td>
            <td>
                {% if perms.newsportal.change_news %}
-               <a href="{% url 'news_update' pk=i.id %}">Изменить</a>
+               <a href="{% url 'news_update' pk=i.id %}">{% trans "Change" %}</a>
                {% endif %}
                {% if perms.newsportal.delete_news %}
-               <a href="{% url 'news_delete' i.id %}">Удалить</a>
+               <a href="{% url 'news_delete' i.id %}">{% trans "Delete" %}</a>
                {% endif %}
            </td>
        </tr>
